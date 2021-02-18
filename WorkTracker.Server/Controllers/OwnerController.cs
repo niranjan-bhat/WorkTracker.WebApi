@@ -52,6 +52,7 @@ namespace WorkTracker.Server.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("RegisterUser")]
         public IActionResult RegisterUser([FromBody] OwnerDTO owner, string encryptedPassword)
         {
