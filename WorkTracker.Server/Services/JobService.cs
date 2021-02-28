@@ -75,5 +75,16 @@ namespace WorkTracker.Server.Services
                 throw e;
             }
         }
+
+        public JobDTO GetJobById(int jobId)
+        {
+            var job = _unitOfWork.Jobs.GetByID(jobId);
+            if (job == null)
+            {
+                throw new Exception(_strLocalizer["JobNotFound"]);
+            }
+
+            return _mapper.Map<JobDTO>(job);
+        }
     }
 }

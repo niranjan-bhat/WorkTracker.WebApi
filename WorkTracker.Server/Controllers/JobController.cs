@@ -40,12 +40,26 @@ namespace WorkTracker.Server.Controllers
         }
 
         [HttpPost]
-        [Route("AddJobForOwner")]
         public IActionResult AddJobForOwner(int ownerId, string jobName)
         {
             try
             {
                 var result = _jobService.AddJobForOwner(ownerId, jobName);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("GetJobById")]
+        public IActionResult GetJobById(int id)
+        {
+            try
+            {
+                var result = _jobService.GetJobById(id);
                 return Ok(result);
             }
             catch (Exception e)

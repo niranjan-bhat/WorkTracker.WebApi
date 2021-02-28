@@ -11,7 +11,7 @@ namespace WorkTracker.Server.Services
         /// <param name="obj"></param>
         /// <param name="encryptedPassword"></param>
         /// <returns></returns>
-        OwnerDTO AddOwner(OwnerDTO obj, string encryptedPassword);
+        OwnerDTO AddOwner(string name, string email, string encryptedPassword);
 
         /// <summary>
         /// Returns the owner having given id
@@ -40,6 +40,6 @@ namespace WorkTracker.Server.Services
         /// <param name="email"></param>
         /// <param name="encryptedPassword"></param>
         /// <returns></returns>
-        bool Authenticate(string email,string encryptedPassword);
+        bool Authenticate(string email, string encryptedPassword);
     }
 }

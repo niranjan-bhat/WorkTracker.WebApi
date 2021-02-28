@@ -22,6 +22,7 @@ using WorkTracker.Server.Services.Contract;
 using System.Linq;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WorkTracker.Server.Authentication;
+using WorkTracker.Server.AutoMapper;
 
 namespace WorkTracker.Server
 {
@@ -41,7 +42,7 @@ namespace WorkTracker.Server
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddAutoMapper(typeof(DtoMapper));
             services.AddDbContextPool<WorkTrackerContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("WorkTrackerConnectionString"), b => b.MigrationsAssembly("WorkTracker.Database")));
 
@@ -160,7 +161,7 @@ namespace WorkTracker.Server
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("../swagger/v1/swagger.json", "My API V1");
                 c.RoutePrefix = "swagger";
             });
         }

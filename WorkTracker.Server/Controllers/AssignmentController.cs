@@ -35,7 +35,7 @@ namespace WorkTracker.Server.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.InnerException?.Message);
+                return BadRequest(e.Message);
             }
         }
 
@@ -51,23 +51,70 @@ namespace WorkTracker.Server.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.InnerException?.Message);
+                return BadRequest(e.Message);
             }
         }
 
         [SwaggerOperation(Summary = "Retrieve all the assignment belongs to given range of dates and belongs to this worker ")]
         [HttpGet]
-        [Route("GetAssignment")]
-        public IActionResult GetAssignment(int ownerId, DateTime startDateTime, DateTime endDateTime, int workerId)
+        [Route("GetAllAssignment")]
+        public IActionResult GetAllAssignment(int ownerId, DateTime startDate, DateTime endDate, int workerId)
         {
             try
             {
-                var result = _assignmentService.GetAssignments(ownerId, startDateTime, endDateTime, workerId);
+                var result = _assignmentService.GetAllAssignments(ownerId, startDate, endDate, workerId);
                 return Ok(result);
             }
             catch (Exception e)
             {
-                return BadRequest(e.InnerException?.Message);
+                return BadRequest(e.Message);
+            }
+        }
+
+        [SwaggerOperation(Summary = "Retrieves single assignment for a given id ")]
+        [HttpGet]
+        public IActionResult GetAssignmentById(int id)
+        {
+            try
+            {
+                var result = _assignmentService.GetAssignmentById(id);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [SwaggerOperation(Summary = "Retrieves single assignment for a given date and worker ")]
+        [HttpGet]
+        [Route("GetAssignmentByDate")]
+        public IActionResult GetAssignmentByDate(int workerId, DateTime assignedDate, int ownerId)
+        {
+            try
+            {
+                var result = _assignmentService.GetAssignmentForDate(workerId, assignedDate, ownerId);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [SwaggerOperation(Summary = "Checks if owner has submitted the attendance for a given date")]
+        [HttpGet]
+        [Route("IsAssignmentSubmitted")]
+        public IActionResult IsAssignmentSubmitted(int ownerId, DateTime date)
+        {
+            try
+            {
+                var result = _assignmentService.IsAssignmentSubmitted(ownerId, date);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
     }

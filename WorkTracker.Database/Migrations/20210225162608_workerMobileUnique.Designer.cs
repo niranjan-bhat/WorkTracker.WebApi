@@ -10,8 +10,8 @@ using WorkTracker.Database;
 namespace WorkTracker.Database.Migrations
 {
     [DbContext(typeof(WorkTrackerContext))]
-    [Migration("20210207104303_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20210225162608_workerMobileUnique")]
+    partial class workerMobileUnique
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -54,6 +54,8 @@ namespace WorkTracker.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasAlternateKey("AssignedDate", "WorkerId");
+
                     b.HasIndex("WorkerId");
 
                     b.ToTable("Assignment");
@@ -95,12 +97,15 @@ namespace WorkTracker.Database.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("OwnerId");
 
@@ -115,15 +120,19 @@ namespace WorkTracker.Database.Migrations
                         .UseIdentityColumn();
 
                     b.Property<string>("Email")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("EncryptedPassword")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.ToTable("Owner");
                 });
@@ -140,16 +149,22 @@ namespace WorkTracker.Database.Migrations
 
                     b.Property<string>("Mobile")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Mobile")
+                        .IsUnique();
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("OwnerId");
 

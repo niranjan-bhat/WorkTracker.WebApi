@@ -23,6 +23,9 @@ namespace WorkTracker.Database
             modelBuilder.Entity<Worker>()
                 .HasIndex(u => u.Name)
                 .IsUnique();
+            modelBuilder.Entity<Worker>()
+                .HasIndex(u => u.Mobile)
+                .IsUnique();
 
             modelBuilder.Entity<Worker>().Property(x => x.Name).IsRequired();
             modelBuilder.Entity<Worker>().Property(x => x.Mobile).IsRequired();
@@ -44,16 +47,9 @@ namespace WorkTracker.Database
 
             modelBuilder.Entity<Assignment>().HasKey(x => x.Id);
             modelBuilder.Entity<Assignment>().Property(x => x.WorkerId).IsRequired();
-
-            modelBuilder.Entity<Owner>().HasData(
-                new Owner()
-                {
-                    Id = 1,
-                    Name = "admin",
-                    Email = "admin@123",
-                    EncryptedPassword = "admin"
-                }
-            );
+            modelBuilder.Entity<Assignment>().Property(x => x.AssignedDate).IsRequired();
+            modelBuilder.Entity<Assignment>().HasAlternateKey(c => new { c.AssignedDate, c.WorkerId });
+            
         }
     }
 }

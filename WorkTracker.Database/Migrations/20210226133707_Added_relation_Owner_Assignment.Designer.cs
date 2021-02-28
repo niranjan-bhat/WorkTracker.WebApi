@@ -10,8 +10,8 @@ using WorkTracker.Database;
 namespace WorkTracker.Database.Migrations
 {
     [DbContext(typeof(WorkTrackerContext))]
-    [Migration("20210207184733_Changed_password_column_name")]
-    partial class Changed_password_column_name
+    [Migration("20210226133707_Added_relation_Owner_Assignment")]
+    partial class Added_relation_Owner_Assignment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -46,6 +46,9 @@ namespace WorkTracker.Database.Migrations
                     b.Property<DateTime>("AssignedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Wage")
                         .HasColumnType("int");
 
@@ -53,6 +56,10 @@ namespace WorkTracker.Database.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasAlternateKey("AssignedDate", "WorkerId");
+
+                    b.HasIndex("OwnerId");
 
                     b.HasIndex("WorkerId");
 
@@ -95,12 +102,15 @@ namespace WorkTracker.Database.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("OwnerId");
 
@@ -115,7 +125,7 @@ namespace WorkTracker.Database.Migrations
                         .UseIdentityColumn();
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("EncryptedPassword")
                         .HasColumnType("nvarchar(max)");
@@ -124,6 +134,10 @@ namespace WorkTracker.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.ToTable("Owner");
                 });
@@ -140,16 +154,22 @@ namespace WorkTracker.Database.Migrations
 
                     b.Property<string>("Mobile")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Mobile")
+                        .IsUnique();
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("OwnerId");
 
@@ -173,11 +193,19 @@ namespace WorkTracker.Database.Migrations
 
             modelBuilder.Entity("WorkTracker.Database.Models.Assignment", b =>
                 {
+                    b.HasOne("WorkTracker.Database.Models.Owner", "Owner")
+                        .WithMany("Assignment")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("WorkTracker.Database.Models.Worker", "Worker")
                         .WithMany("Assignments")
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Owner");
 
                     b.Navigation("Worker");
                 });
@@ -222,6 +250,8 @@ namespace WorkTracker.Database.Migrations
 
             modelBuilder.Entity("WorkTracker.Database.Models.Owner", b =>
                 {
+                    b.Navigation("Assignment");
+
                     b.Navigation("Jobs");
 
                     b.Navigation("Workers");

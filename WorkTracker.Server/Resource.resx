@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AssignmentNotFound" xml:space="preserve">
+    <value>Assignment not found</value>
+  </data>
   <data name="ErrorAssignmentNotFound" xml:space="preserve">
     <value>Assignment not found</value>
   </data>
@@ -146,6 +149,9 @@
   </data>
   <data name="InvalidWorkerMobileNumber" xml:space="preserve">
     <value>Invalid worker mobile number</value>
+  </data>
+  <data name="JobNotFound" xml:space="preserve">
+    <value>Job not found</value>
   </data>
   <data name="OwnerNotFound" xml:space="preserve">
     <value>Owner not found</value>

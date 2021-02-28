@@ -10,8 +10,8 @@ using WorkTracker.Database;
 namespace WorkTracker.Database.Migrations
 {
     [DbContext(typeof(WorkTrackerContext))]
-    [Migration("20210217122848_JobName_made_unique")]
-    partial class JobName_made_unique
+    [Migration("20210225161331_initialMigration")]
+    partial class initialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -53,6 +53,8 @@ namespace WorkTracker.Database.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasAlternateKey("AssignedDate", "WorkerId");
 
                     b.HasIndex("WorkerId");
 
@@ -133,15 +135,6 @@ namespace WorkTracker.Database.Migrations
                         .HasFilter("[Email] IS NOT NULL");
 
                     b.ToTable("Owner");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 999,
-                            Email = "admin@123",
-                            EncryptedPassword = "admin",
-                            Name = "admin"
-                        });
                 });
 
             modelBuilder.Entity("WorkTracker.Database.Models.Worker", b =>

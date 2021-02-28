@@ -52,23 +52,23 @@ namespace WorkTracker.Server.Controllers
         }
 
         [HttpPost]
-        [Route("RegisterUser")]
         [AllowAnonymous]
-        public IActionResult RegisterUser([FromBody] OwnerDTO owner, string encryptedPassword)
+        [Route("RegisterUser")]
+        public IActionResult RegisterUser(string name, string email, string encryptedPassword)
         {
-            if (string.IsNullOrEmpty(owner.Email))
+            if (string.IsNullOrEmpty(email))
                 return BadRequest(_strLocalizer["ErrorInvalidEmail"]);
-            if (string.IsNullOrEmpty(owner.Name))
+            if (string.IsNullOrEmpty(name))
                 return BadRequest(_strLocalizer["ErrorInvalidName"]);
 
             try
             {
-                var res = _ownerService.AddOwner(owner, encryptedPassword);
+                var res = _ownerService.AddOwner(name, email, encryptedPassword);
                 return Ok(res);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e.InnerException == null ? e.Message : e.InnerException.Message);
             }
         }
 

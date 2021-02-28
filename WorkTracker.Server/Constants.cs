@@ -12,6 +12,7 @@ namespace WorkTracker.Server
 
         #region ErrorCodes
         public static string InvalidEmail = "http://localhost:60365";
+        public static string DateFormat = "yyyy-MM-dd";
         
 
         #endregion

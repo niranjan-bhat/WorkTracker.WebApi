@@ -46,7 +46,6 @@ namespace WorkTracker.Server.Controllers
         }
 
         [HttpPost]
-        [Route("AddWorkerForOwner")]
         public IActionResult AddWorkerForOwner(int ownerId, string workerName, string mobileNumber)
         {
             if (string.IsNullOrEmpty(workerName))

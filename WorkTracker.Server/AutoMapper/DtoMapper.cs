@@ -13,17 +13,11 @@ namespace WorkTracker.Server.AutoMapper
     {
         public DtoMapper()
         {
-            CreateMap<OwnerDTO, Owner>();
-            CreateMap<Owner, OwnerDTO>();
-            CreateMap<JobDTO, Job>();
-            CreateMap<Job, JobDTO>();
-            CreateMap<WorkerDTO, Worker>();
-            CreateMap<Worker, WorkerDTO>();
-            CreateMap<AssignmentDTO, Assignment>();
-            CreateMap<Assignment, AssignmentDTO>();
-            CreateMap<List<Assignment>, List<AssignmentDTO>>();
-            CreateMap<CommentDTO, Comment>();
-            CreateMap<Comment, CommentDTO>();
+            CreateMap<OwnerDTO, Owner>().ReverseMap();
+            CreateMap<JobDTO, Job>().ReverseMap();
+            CreateMap<WorkerDTO, Worker>().ReverseMap();
+            CreateMap<CommentDTO, Comment>().ReverseMap();
+            CreateMap<Assignment, AssignmentDTO>().ReverseMap();
         }
     }
 }

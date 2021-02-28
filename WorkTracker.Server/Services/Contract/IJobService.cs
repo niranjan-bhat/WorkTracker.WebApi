@@ -22,5 +22,12 @@ namespace WorkTracker.Server.Services.Contract
         /// <param name="jobName"></param>
         /// <returns></returns>
         JobDTO AddJobForOwner(int ownerId, string jobName);
+
+        /// <summary>
+        /// Returns the job which has given id 
+        /// </summary>
+        /// <param name="jobId"></param>
+        /// <returns></returns>
+        JobDTO GetJobById(int jobId);
     }
 }

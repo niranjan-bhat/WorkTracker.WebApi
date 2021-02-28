@@ -10,6 +10,7 @@ namespace WorkTracker.Database.Models
         {
             this.Jobs = new HashSet<Job>();
             this.Workers = new HashSet<Worker>();
+            this.Assignment = new HashSet<Assignment>();
         }
         public int Id { get; set; }
         public string Name { get; set; }
@@ -20,5 +21,6 @@ namespace WorkTracker.Database.Models
         //Navigation properties
         public virtual ICollection<Job> Jobs { get; set; }
         public virtual ICollection<Worker> Workers { get; set; }
+        public virtual ICollection<Assignment> Assignment { get; set; }
     }
 }

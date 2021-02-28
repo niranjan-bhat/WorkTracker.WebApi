@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.Localization;
+using WorkTracker.Database.DTO;
 using WorkTracker.Database.DTOs;
 using WorkTracker.Database.Interfaces;
 using WorkTracker.Database.Models;
@@ -13,12 +13,13 @@ namespace WorkTracker.Server.Services
 {
     public class AssignmentService : IAssignmentService
     {
-        private IUnitOfWork _unitOfWork;
-        private IMapper _mapper;
         private IHelper _helper;
-        private IStringLocalizer _strLocalizer;
+        private readonly IMapper _mapper;
+        private readonly IStringLocalizer _strLocalizer;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AssignmentService(IUnitOfWork unitOfWork, IMapper mapper, IHelper helper, IStringLocalizer<Resource> stringLocalizer)
+        public AssignmentService(IUnitOfWork unitOfWork, IMapper mapper, IHelper helper,
+            IStringLocalizer<Resource> stringLocalizer)
         {
             _mapper = mapper;
             _helper = helper;
@@ -27,34 +28,32 @@ namespace WorkTracker.Server.Services
         }
 
         /// <summary>
-        /// Returns all the assignment within the given date range corresponding to specific worker and owner.
+        ///     Returns all the assignment within the given date range corresponding to specific worker and owner.
         /// </summary>
         /// <param name="ownerId"></param>
         /// <param name="startDateTime"></param>
         /// <param name="endDateTime"></param>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public List<AssignmentDTO> GetAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int workerId)
+        public List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime,
+            int workerId)
         {
             if (startDateTime == null || endDateTime == null || startDateTime > endDateTime)
                 throw new Exception(_strLocalizer["ErrorInvalidDate"]);
 
             var worker = _unitOfWork.Workers.GetByID(workerId);
-            if (worker == null)
-            {
-                throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
-            }
+            if (worker == null) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
 
             var assignmentList = _unitOfWork.Assignments.Get(x => x.WorkerId == workerId &&
                                                                   x.AssignedDate >= startDateTime &&
-                                                                  x.AssignedDate <= endDateTime,null,$"Jobs,Comments")?.
-                                                                  Select(x => _mapper.Map<AssignmentDTO>(x)).ToList();
+                                                                  x.AssignedDate <= endDateTime)
+                ?.Select(x => _mapper.Map<AssignmentDTO>(x)).ToList();
 
             return assignmentList;
         }
 
         /// <summary>
-        /// Updates the assignment
+        ///     Updates the assignment
         /// </summary>
         /// <param name="ownerId"></param>
         /// <param name="assignment"></param>
@@ -63,14 +62,14 @@ namespace WorkTracker.Server.Services
         {
             var worker = GetWorkersFromDb(assignment.WorkerId, ownerId);
 
-            var jobs = GetJObsFromDb(assignment.Jobs?.ToList(), ownerId);
+            var jobs = GetJobsFromDb(assignment.Jobs?.ToList(), ownerId);
 
-            var insertedEntity = _unitOfWork.Assignments.Update(new Assignment()
+            var insertedEntity = _unitOfWork.Assignments.Update(new Assignment
             {
                 Worker = worker,
                 Jobs = jobs,
                 Wage = assignment.Wage,
-                AssignedDate = assignment.AssignedDate,
+                AssignedDate = assignment.AssignedDate
             });
             _unitOfWork.Commit();
 
@@ -78,7 +77,7 @@ namespace WorkTracker.Server.Services
         }
 
         /// <summary>
-        /// Adds single comment to assignment
+        ///     Adds single comment to assignment
         /// </summary>
         /// <param name="assignmentId"></param>
         /// <param name="comment"></param>
@@ -90,12 +89,9 @@ namespace WorkTracker.Server.Services
 
             var assignment = _unitOfWork.Assignments.GetByID(assignmentId);
 
-            if (assignment == null)
-            {
-                throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
-            }
+            if (assignment == null) throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
 
-            var insertedComment = _unitOfWork.Comments.Insert(new Comment()
+            var insertedComment = _unitOfWork.Comments.Insert(new Comment
             {
                 AddeTime = DateTime.Now,
                 Assignment = assignment,
@@ -106,8 +102,17 @@ namespace WorkTracker.Server.Services
             return _mapper.Map<CommentDTO>(insertedComment);
         }
 
+        public AssignmentDTO GetAssignmentById(int assignmentId)
+        {
+            var result = _unitOfWork.Assignments.Get(x => x.Id == assignmentId, null,
+                    $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)},{nameof(Assignment.Worker)}")
+                ?.FirstOrDefault();
+            if (result == null) throw new Exception(_strLocalizer["AssignmentNotFound"]);
+            return _mapper.Map<AssignmentDTO>(result);
+        }
+
         /// <summary>
-        /// Insert assignment to the database
+        ///     Insert assignment to the database
         /// </summary>
         /// <param name="ownerId"></param>
         /// <param name="wage"></param>
@@ -115,26 +120,50 @@ namespace WorkTracker.Server.Services
         /// <param name="assignedDate"></param>
         /// <param name="jobs"></param>
         /// <returns></returns>
-        public AssignmentDTO AddAssignment(int ownerId, int wage, int workerId, DateTime assignedDate, List<JobDTO> jobs)
+        public AssignmentDTO AddAssignment(int ownerId, int wage, int workerId, DateTime assignedDate,
+            List<JobDTO> jobs)
         {
             var worker = GetWorkersFromDb(workerId, ownerId);
 
-            var dbJobs = GetJObsFromDb(jobs, ownerId);
+            var dbJobs = GetJobsFromDb(jobs, ownerId);
 
-            var insertedEntity = _unitOfWork.Assignments.Insert(new Assignment()
+            var owner = GetOwnerByID(ownerId);
+
+            var insertedEntity = _unitOfWork.Assignments.Insert(new Assignment
             {
                 Worker = worker,
                 Jobs = dbJobs,
                 Wage = wage,
-                AssignedDate = assignedDate,
+                Owner = owner,
+                AssignedDate = assignedDate
             });
             _unitOfWork.Commit();
 
             return _mapper.Map<AssignmentDTO>(insertedEntity);
         }
 
+        public AssignmentDTO GetAssignmentForDate(int workerId, DateTime date, int ownerId)
+        {
+            var worker = _unitOfWork.Workers.GetByID(workerId);
+            if (worker == null || worker.OwnerId != ownerId) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
+
+            var assignment = _unitOfWork.Assignments.Get(x => x.AssignedDate == date &&
+                                                              x.WorkerId == workerId, null,
+                $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}").FirstOrDefault();
+
+            if (assignment == null) throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
+
+            return _mapper.Map<AssignmentDTO>(assignment);
+        }
+
+        public bool IsAssignmentSubmitted(int ownerId, DateTime date)
+        {
+            var isPresent = _unitOfWork.Assignments.Get(x => x.OwnerId == ownerId && x.AssignedDate == date).Any();
+            return isPresent;
+        }
+
         /// <summary>
-        /// Retrieves the worker from the database
+        ///     Retrieves the worker from the database
         /// </summary>
         /// <param name="workerId"></param>
         /// <param name="ownerId"></param>
@@ -142,38 +171,38 @@ namespace WorkTracker.Server.Services
         private Worker GetWorkersFromDb(int workerId, int ownerId)
         {
             var worker = _unitOfWork.Workers.GetByID(workerId);
-            if (worker == null || worker.OwnerId != ownerId)
-            {
-                throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
-            }
+            if (worker == null || worker.OwnerId != ownerId) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
             return worker;
         }
 
         /// <summary>
-        /// Retrieves the the job from the database corresponding to owner
+        ///     Retrieves the the job from the database corresponding to owner
         /// </summary>
         /// <param name="jobs"></param>
         /// <param name="ownerId"></param>
         /// <returns></returns>
-        private List<Job> GetJObsFromDb(List<JobDTO> jobs, int ownerId)
+        private List<Job> GetJobsFromDb(List<JobDTO> jobs, int ownerId)
         {
-            if (jobs == null)
-            {
-                throw new Exception(_strLocalizer["ErrorInvalidJob"]);
-            }
+            if (jobs == null) throw new Exception(_strLocalizer["ErrorInvalidJob"]);
             var dbjobs = new List<Job>();
 
             foreach (var job in jobs)
             {
                 var dbjob = _unitOfWork.Jobs.GetByID(job.Id);
-                if (dbjob == null || dbjob.OwnerId != ownerId)
-                {
-                    throw new Exception(_strLocalizer["ErrorInvalidJob"]);
-                }
+                if (dbjob == null || dbjob.OwnerId != ownerId) throw new Exception(_strLocalizer["ErrorInvalidJob"]);
                 dbjobs.Add(dbjob);
             }
 
             return dbjobs;
+        }
+
+        private Owner GetOwnerByID(int ownerId)
+        {
+           var owner = _unitOfWork.Owners.GetByID(ownerId);
+           if(owner == null)
+               throw new Exception(_strLocalizer["OwnerNotFound"]);
+
+           return owner;
         }
     }
 }

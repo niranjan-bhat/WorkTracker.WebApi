@@ -28,10 +28,17 @@ namespace WorkTracker.Server.Services
         /// <param name="obj"></param>
         /// <param name="encryptedPassword"></param>
         /// <returns></returns>
-        public OwnerDTO AddOwner(OwnerDTO obj, string encryptedPassword)
+        public OwnerDTO AddOwner(string name, string email, string encryptedPassword)
         {
-            var ownerToInsert = _mapper.Map<Owner>(obj);
-            ownerToInsert.EncryptedPassword = encryptedPassword;
+            var ownerToInsert = new Owner()
+            {
+                Workers = null,
+                Jobs = null,
+                Name = name,
+                Email = email,
+                EncryptedPassword = encryptedPassword
+            };
+
             _unitOfWork.Owners.Insert(ownerToInsert);
             _unitOfWork.Commit();
 

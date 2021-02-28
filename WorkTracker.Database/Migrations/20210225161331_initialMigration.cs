@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WorkTracker.Database.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class initialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,8 +14,8 @@ namespace WorkTracker.Database.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Email = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    EncryptedPassword = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -28,7 +28,7 @@ namespace WorkTracker.Database.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OwnerId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -49,7 +49,7 @@ namespace WorkTracker.Database.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Mobile = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OwnerId = table.Column<int>(type: "int", nullable: false)
@@ -78,6 +78,7 @@ namespace WorkTracker.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Assignment", x => x.Id);
+                    table.UniqueConstraint("AK_Assignment_AssignedDate_WorkerId", x => new { x.AssignedDate, x.WorkerId });
                     table.ForeignKey(
                         name: "FK_Assignment_Worker_WorkerId",
                         column: x => x.WorkerId,
@@ -147,9 +148,28 @@ namespace WorkTracker.Database.Migrations
                 column: "AssignmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Job_Name",
+                table: "Job",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Job_OwnerId",
                 table: "Job",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Owner_Email",
+                table: "Owner",
+                column: "Email",
+                unique: true,
+                filter: "[Email] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Worker_Name",
+                table: "Worker",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Worker_OwnerId",

@@ -63,6 +63,15 @@ namespace WorkTracker.Server {
         /// <summary>
         ///   Looks up a localized string similar to Assignment not found.
         /// </summary>
+        public static string AssignmentNotFound {
+            get {
+                return ResourceManager.GetString("AssignmentNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assignment not found.
+        /// </summary>
         public static string ErrorAssignmentNotFound {
             get {
                 return ResourceManager.GetString("ErrorAssignmentNotFound", resourceCulture);
@@ -147,6 +156,15 @@ namespace WorkTracker.Server {
         public static string InvalidWorkerMobileNumber {
             get {
                 return ResourceManager.GetString("InvalidWorkerMobileNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job not found.
+        /// </summary>
+        public static string JobNotFound {
+            get {
+                return ResourceManager.GetString("JobNotFound", resourceCulture);
             }
         }
         
