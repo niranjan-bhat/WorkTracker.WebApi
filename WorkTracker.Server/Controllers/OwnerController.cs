@@ -84,11 +84,20 @@ namespace WorkTracker.Server.Controllers
 
             if (!_ownerService.Authenticate(email, password))
             {
-                return BadRequest("Auth failed ");
+                return BadRequest("Authentication failed ");
             }
 
             var token = _tokenManager.GenerateJwtToken();
             return Ok(token);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("VerifyEmail")]
+        public IActionResult VerifyUserEmail(string email)
+        {
+            _ownerService.VerifyEmail(email);
+            return Ok(true);
         }
     }
 }

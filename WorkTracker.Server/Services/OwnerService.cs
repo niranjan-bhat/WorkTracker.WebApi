@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using WorkTracker.Database.DTO;
@@ -14,6 +15,7 @@ namespace WorkTracker.Server.Services
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private IHelper _helper;
+
 
         public OwnerService(IUnitOfWork unitOfWork, IMapper mapper, IHelper helper)
         {
@@ -104,12 +106,24 @@ namespace WorkTracker.Server.Services
         /// <returns></returns>
         public bool Authenticate(string email, string encryptedPassword)
         {
-            var user = _unitOfWork.Owners.Get(x => x.Email == email).FirstOrDefault();
+            var user = _unitOfWork.Owners.Get(x => x.Email == email && x.IsEmailVerified == true).FirstOrDefault();
             if (user == null)
             {
                 return false;
             }
             return string.Equals(encryptedPassword, user.EncryptedPassword);
+        }
+
+        public void VerifyEmail(string email)
+        {
+            var user = _unitOfWork.Owners.Get(x => x.Email == email).FirstOrDefault();
+            if (user == null)
+                throw new Exception("Invalid email");
+
+            user.IsEmailVerified = true;
+
+            _unitOfWork.Owners.Update(user);
+            _unitOfWork.Commit();
         }
     }
 }

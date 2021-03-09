@@ -1,4 +1,5 @@
-﻿using WorkTracker.Database.DTO;
+﻿using System.Threading.Tasks;
+using WorkTracker.Database.DTO;
 using WorkTracker.Database.Models;
 
 namespace WorkTracker.Server.Services
@@ -41,5 +42,11 @@ namespace WorkTracker.Server.Services
         /// <param name="encryptedPassword"></param>
         /// <returns></returns>
         bool Authenticate(string email, string encryptedPassword);
+
+        /// <summary>
+        /// Verifies the user email
+        /// </summary>
+        /// <param name="email"></param>
+        void VerifyEmail(string email);
     }
 }

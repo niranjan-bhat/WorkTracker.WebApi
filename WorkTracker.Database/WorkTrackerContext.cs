@@ -20,9 +20,7 @@ namespace WorkTracker.Database
                 .IsUnique();
 
             modelBuilder.Entity<Worker>().HasKey(x => x.Id);
-            modelBuilder.Entity<Worker>()
-                .HasIndex(u => u.Name)
-                .IsUnique();
+            modelBuilder.Entity<Worker>().HasAlternateKey(c => new { c.Name, c.OwnerId });
             modelBuilder.Entity<Worker>()
                 .HasIndex(u => u.Mobile)
                 .IsUnique();
@@ -32,9 +30,7 @@ namespace WorkTracker.Database
 
             modelBuilder.Entity<Job>().HasKey(x => x.Id);
             modelBuilder.Entity<Job>().Property(x => x.Name).IsRequired();
-            modelBuilder.Entity<Job>()
-                .HasIndex(u => u.Name)
-                .IsUnique();
+            modelBuilder.Entity<Job>().HasAlternateKey(c => new { c.Name, c.OwnerId });
 
 
             modelBuilder.Entity<Job>().HasMany(x => x.Assignments).WithMany(x => x.Jobs)

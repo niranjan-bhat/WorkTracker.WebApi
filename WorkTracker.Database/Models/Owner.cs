@@ -17,6 +17,8 @@ namespace WorkTracker.Database.Models
         public string Email { get; set; }
         public string EncryptedPassword { get; set; }
 
+        public bool IsEmailVerified { get; set; }
+
 
         //Navigation properties
         public virtual ICollection<Job> Jobs { get; set; }
