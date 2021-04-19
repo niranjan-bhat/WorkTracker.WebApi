@@ -15,7 +15,8 @@ namespace WorkTracker.Database.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    EncryptedPassword = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    EncryptedPassword = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsEmailVerified = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,6 +36,7 @@ namespace WorkTracker.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Job", x => x.Id);
+                    table.UniqueConstraint("AK_Job_Name_OwnerId", x => new { x.Name, x.OwnerId });
                     table.ForeignKey(
                         name: "FK_Job_Owner_OwnerId",
                         column: x => x.OwnerId,
@@ -50,13 +52,14 @@ namespace WorkTracker.Database.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Mobile = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Mobile = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OwnerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Worker", x => x.Id);
+                    table.UniqueConstraint("AK_Worker_Name_OwnerId", x => new { x.Name, x.OwnerId });
                     table.ForeignKey(
                         name: "FK_Worker_Owner_OwnerId",
                         column: x => x.OwnerId,
@@ -72,6 +75,7 @@ namespace WorkTracker.Database.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     WorkerId = table.Column<int>(type: "int", nullable: false),
+                    OwnerId = table.Column<int>(type: "int", nullable: false),
                     AssignedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Wage = table.Column<int>(type: "int", nullable: false)
                 },
@@ -80,11 +84,17 @@ namespace WorkTracker.Database.Migrations
                     table.PrimaryKey("PK_Assignment", x => x.Id);
                     table.UniqueConstraint("AK_Assignment_AssignedDate_WorkerId", x => new { x.AssignedDate, x.WorkerId });
                     table.ForeignKey(
+                        name: "FK_Assignment_Owner_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "Owner",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Assignment_Worker_WorkerId",
                         column: x => x.WorkerId,
                         principalTable: "Worker",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,13 +112,13 @@ namespace WorkTracker.Database.Migrations
                         column: x => x.AssignmentsId,
                         principalTable: "Assignment",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_AssignmentJob_Job_JobsId",
                         column: x => x.JobsId,
                         principalTable: "Job",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -133,6 +143,11 @@ namespace WorkTracker.Database.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Assignment_OwnerId",
+                table: "Assignment",
+                column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Assignment_WorkerId",
                 table: "Assignment",
                 column: "WorkerId");
@@ -148,12 +163,6 @@ namespace WorkTracker.Database.Migrations
                 column: "AssignmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Job_Name",
-                table: "Job",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Job_OwnerId",
                 table: "Job",
                 column: "OwnerId");
@@ -166,9 +175,9 @@ namespace WorkTracker.Database.Migrations
                 filter: "[Email] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Worker_Name",
+                name: "IX_Worker_Mobile",
                 table: "Worker",
-                column: "Name",
+                column: "Mobile",
                 unique: true);
 
             migrationBuilder.CreateIndex(

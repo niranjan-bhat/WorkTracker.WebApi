@@ -127,6 +127,9 @@ namespace WorkTracker.Database.Migrations
                     b.Property<string>("EncryptedPassword")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -177,13 +180,13 @@ namespace WorkTracker.Database.Migrations
                     b.HasOne("WorkTracker.Database.Models.Assignment", null)
                         .WithMany()
                         .HasForeignKey("AssignmentsId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("WorkTracker.Database.Models.Job", null)
                         .WithMany()
                         .HasForeignKey("JobsId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

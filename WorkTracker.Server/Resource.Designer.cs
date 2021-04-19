@@ -63,15 +63,6 @@ namespace WorkTracker.Server {
         /// <summary>
         ///   Looks up a localized string similar to Assignment not found.
         /// </summary>
-        public static string AssignmentNotFound {
-            get {
-                return ResourceManager.GetString("AssignmentNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Assignment not found.
-        /// </summary>
         public static string ErrorAssignmentNotFound {
             get {
                 return ResourceManager.GetString("ErrorAssignmentNotFound", resourceCulture);
@@ -129,6 +120,15 @@ namespace WorkTracker.Server {
         public static string ErrorInvalidWorkerName {
             get {
                 return ResourceManager.GetString("ErrorInvalidWorkerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date range can be maximum of 31 days.
+        /// </summary>
+        public static string ErrorOverflowDateRange {
+            get {
+                return ResourceManager.GetString("ErrorOverflowDateRange", resourceCulture);
             }
         }
         

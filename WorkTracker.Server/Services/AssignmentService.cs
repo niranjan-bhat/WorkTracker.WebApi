@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.Extensions.Localization;
+using Org.BouncyCastle.Crypto;
 using WorkTracker.Database.DTO;
 using WorkTracker.Database.DTOs;
 using WorkTracker.Database.Interfaces;
@@ -35,45 +37,65 @@ namespace WorkTracker.Server.Services
         /// <param name="endDateTime"></param>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime,
-            int workerId)
+        public List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int? workerId)
         {
             if (startDateTime == null || endDateTime == null || startDateTime > endDateTime)
                 throw new Exception(_strLocalizer["ErrorInvalidDate"]);
 
-            var worker = _unitOfWork.Workers.GetByID(workerId);
-            if (worker == null) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
+            if ((endDateTime - startDateTime).TotalDays > 31)
+            {
+                throw new Exception(_strLocalizer["ErrorOverflowDateRange"]);
+            }
 
-            var assignmentList = _unitOfWork.Assignments.Get(x => x.WorkerId == workerId &&
+            if (workerId.HasValue)
+            {
+                var worker = _unitOfWork.Workers.GetByID(workerId);
+                if (worker == null) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
+            }
+
+            var assignmentList = _unitOfWork.Assignments.Get(x => (workerId == null || x.WorkerId == workerId.Value) &&
                                                                   x.AssignedDate >= startDateTime &&
-                                                                  x.AssignedDate <= endDateTime)
+                                                                  x.AssignedDate <= endDateTime, null,
+                                                                  $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}")
                 ?.Select(x => _mapper.Map<AssignmentDTO>(x)).ToList();
 
             return assignmentList;
         }
 
         /// <summary>
-        ///     Updates the assignment
+        ///  Delete the assignments for a given date
         /// </summary>
         /// <param name="ownerId"></param>
-        /// <param name="assignment"></param>
+        /// <param name="assignedDate"></param>
         /// <returns></returns>
-        public AssignmentDTO UpdateAssignment(int ownerId, AssignmentDTO assignment)
+        public bool DeleteAssignments(int ownerId, DateTime assignedDate)
         {
-            var worker = GetWorkersFromDb(assignment.WorkerId, ownerId);
+            var assignmentsToDelete = _unitOfWork.Assignments.Get(x => x.OwnerId == ownerId &&
+                                                                       x.AssignedDate == assignedDate,null,
+                                        $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}")?.ToList();
 
-            var jobs = GetJobsFromDb(assignment.Jobs?.ToList(), ownerId);
-
-            var insertedEntity = _unitOfWork.Assignments.Update(new Assignment
+            if (assignmentsToDelete != null)
             {
-                Worker = worker,
-                Jobs = jobs,
-                Wage = assignment.Wage,
-                AssignedDate = assignment.AssignedDate
-            });
-            _unitOfWork.Commit();
+                foreach (var assignment in assignmentsToDelete)
+                {
+                    _unitOfWork.Assignments.Delete(assignment);
+                }
+                _unitOfWork.Commit();
+            }
 
-            return _mapper.Map<AssignmentDTO>(insertedEntity);
+            return true;
+        }
+
+        private bool CheckJobsAreSame(List<JobDTO> jobsToUpdate, List<JobDTO> dbJobs)
+        {
+            jobsToUpdate = jobsToUpdate == null ? new List<JobDTO>() : jobsToUpdate;
+            dbJobs = dbJobs == null ? new List<JobDTO>() : dbJobs;
+
+            var dbIds = dbJobs?.Select(x => x.Id).OrderByDescending(x => x);
+            var jobsToUpdateIds = jobsToUpdate?.Select(x => x.Id).OrderByDescending(x => x);
+
+
+            return dbIds.All(jobsToUpdateIds.Contains);
         }
 
         /// <summary>
@@ -107,7 +129,7 @@ namespace WorkTracker.Server.Services
             var result = _unitOfWork.Assignments.Get(x => x.Id == assignmentId, null,
                     $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)},{nameof(Assignment.Worker)}")
                 ?.FirstOrDefault();
-            if (result == null) throw new Exception(_strLocalizer["AssignmentNotFound"]);
+            if (result == null) throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
             return _mapper.Map<AssignmentDTO>(result);
         }
 
@@ -139,28 +161,24 @@ namespace WorkTracker.Server.Services
             });
             _unitOfWork.Commit();
 
-            return _mapper.Map<AssignmentDTO>(insertedEntity);
+            var entityInserted = _unitOfWork.Assignments.GetByID(insertedEntity.Id);
+
+            return _mapper.Map<AssignmentDTO>(entityInserted);
         }
 
-        public AssignmentDTO GetAssignmentForDate(int workerId, DateTime date, int ownerId)
-        {
-            var worker = _unitOfWork.Workers.GetByID(workerId);
-            if (worker == null || worker.OwnerId != ownerId) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
+        //public AssignmentDTO GetAssignmentForDate(int workerId, DateTime date, int ownerId)
+        //{
+        //    var worker = _unitOfWork.Workers.GetByID(workerId);
+        //    if (worker == null || worker.OwnerId != ownerId) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
 
-            var assignment = _unitOfWork.Assignments.Get(x => x.AssignedDate == date &&
-                                                              x.WorkerId == workerId, null,
-                $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}").FirstOrDefault();
+        //    var assignment = _unitOfWork.Assignments.Get(x => x.AssignedDate == date &&
+        //                                                      x.WorkerId == workerId, null,
+        //        $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}").FirstOrDefault();
 
-            if (assignment == null) throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
+        //    if (assignment == null) throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
 
-            return _mapper.Map<AssignmentDTO>(assignment);
-        }
-
-        public bool IsAssignmentSubmitted(int ownerId, DateTime date)
-        {
-            var isPresent = _unitOfWork.Assignments.Get(x => x.OwnerId == ownerId && x.AssignedDate == date).Any();
-            return isPresent;
-        }
+        //    return _mapper.Map<AssignmentDTO>(assignment);
+        //}
 
         /// <summary>
         ///     Retrieves the worker from the database
@@ -198,11 +216,11 @@ namespace WorkTracker.Server.Services
 
         private Owner GetOwnerByID(int ownerId)
         {
-           var owner = _unitOfWork.Owners.GetByID(ownerId);
-           if(owner == null)
-               throw new Exception(_strLocalizer["OwnerNotFound"]);
+            var owner = _unitOfWork.Owners.GetByID(ownerId);
+            if (owner == null)
+                throw new Exception(_strLocalizer["OwnerNotFound"]);
 
-           return owner;
+            return owner;
         }
     }
 }

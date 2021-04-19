@@ -32,12 +32,6 @@ namespace WorkTracker.Database
             modelBuilder.Entity<Job>().Property(x => x.Name).IsRequired();
             modelBuilder.Entity<Job>().HasAlternateKey(c => new { c.Name, c.OwnerId });
 
-
-            modelBuilder.Entity<Job>().HasMany(x => x.Assignments).WithMany(x => x.Jobs)
-                .UsingEntity<Dictionary<string, object>>("AssignmentJob",
-                    j => j.HasOne<Assignment>().WithMany().OnDelete(DeleteBehavior.Restrict),
-                    j => j.HasOne<Job>().WithMany().OnDelete(DeleteBehavior.Restrict));
-
             modelBuilder.Entity<Comment>().HasKey(x => x.Id);
             modelBuilder.Entity<Comment>().Property(x => x.OwnerComment).IsRequired();
 
@@ -45,7 +39,12 @@ namespace WorkTracker.Database
             modelBuilder.Entity<Assignment>().Property(x => x.WorkerId).IsRequired();
             modelBuilder.Entity<Assignment>().Property(x => x.AssignedDate).IsRequired();
             modelBuilder.Entity<Assignment>().HasAlternateKey(c => new { c.AssignedDate, c.WorkerId });
-            
+
+            modelBuilder.Entity<Job>().HasMany(x => x.Assignments).WithMany(x => x.Jobs)
+                .UsingEntity<Dictionary<string, object>>("AssignmentJob",
+                    j => j.HasOne<Assignment>().WithMany().OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne<Job>().WithMany().OnDelete(DeleteBehavior.Cascade));
+
         }
     }
 }

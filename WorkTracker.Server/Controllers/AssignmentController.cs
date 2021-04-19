@@ -58,7 +58,7 @@ namespace WorkTracker.Server.Controllers
         [SwaggerOperation(Summary = "Retrieve all the assignment belongs to given range of dates and belongs to this worker ")]
         [HttpGet]
         [Route("GetAllAssignment")]
-        public IActionResult GetAllAssignment(int ownerId, DateTime startDate, DateTime endDate, int workerId)
+        public IActionResult GetAllAssignment(int ownerId, DateTime startDate, DateTime endDate, int? workerId = null)
         {
             try
             {
@@ -86,30 +86,13 @@ namespace WorkTracker.Server.Controllers
             }
         }
 
-        [SwaggerOperation(Summary = "Retrieves single assignment for a given date and worker ")]
-        [HttpGet]
-        [Route("GetAssignmentByDate")]
-        public IActionResult GetAssignmentByDate(int workerId, DateTime assignedDate, int ownerId)
+        [SwaggerOperation(Summary = "Delete the Assignments for given date and owner")]
+        [HttpDelete]
+        public IActionResult DeleteAssignment(int ownerId, DateTime assignedDate)
         {
             try
             {
-                var result = _assignmentService.GetAssignmentForDate(workerId, assignedDate, ownerId);
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [SwaggerOperation(Summary = "Checks if owner has submitted the attendance for a given date")]
-        [HttpGet]
-        [Route("IsAssignmentSubmitted")]
-        public IActionResult IsAssignmentSubmitted(int ownerId, DateTime date)
-        {
-            try
-            {
-                var result = _assignmentService.IsAssignmentSubmitted(ownerId, date);
+                var result = _assignmentService.DeleteAssignments(ownerId, assignedDate);
                 return Ok(result);
             }
             catch (Exception e)

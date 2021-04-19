@@ -10,8 +10,8 @@ using WorkTracker.Database;
 namespace WorkTracker.Database.Migrations
 {
     [DbContext(typeof(WorkTrackerContext))]
-    [Migration("20210226133707_Added_relation_Owner_Assignment")]
-    partial class Added_relation_Owner_Assignment
+    [Migration("20210408163756_initialMigration")]
+    partial class initialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -109,8 +109,7 @@ namespace WorkTracker.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasAlternateKey("Name", "OwnerId");
 
                     b.HasIndex("OwnerId");
 
@@ -129,6 +128,9 @@ namespace WorkTracker.Database.Migrations
 
                     b.Property<string>("EncryptedPassword")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -165,10 +167,9 @@ namespace WorkTracker.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Mobile")
-                        .IsUnique();
+                    b.HasAlternateKey("Name", "OwnerId");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Mobile")
                         .IsUnique();
 
                     b.HasIndex("OwnerId");
@@ -181,13 +182,13 @@ namespace WorkTracker.Database.Migrations
                     b.HasOne("WorkTracker.Database.Models.Assignment", null)
                         .WithMany()
                         .HasForeignKey("AssignmentsId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("WorkTracker.Database.Models.Job", null)
                         .WithMany()
                         .HasForeignKey("JobsId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

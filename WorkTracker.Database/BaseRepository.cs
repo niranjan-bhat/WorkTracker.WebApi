@@ -64,7 +64,6 @@ internal class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : cl
     public virtual TEntity Update(TEntity entityToUpdate)
     {
         dbSet.Attach(entityToUpdate);
-        context.Entry(entityToUpdate).State = EntityState.Modified;
 
         return entityToUpdate;
     }

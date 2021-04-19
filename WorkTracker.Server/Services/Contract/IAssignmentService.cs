@@ -27,15 +27,18 @@ namespace WorkTracker.Server.Services.Contract
         /// <param name="endDateTime"></param>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int workerId);
+        List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int? workerId);
 
         /// <summary>
         /// Updates the assignment
         /// </summary>
         /// <param name="ownerId"></param>
-        /// <param name="assignment"></param>
+        /// <param name="assignedDate"></param>
+        /// <param name="assignmentId"></param>
+        /// <param name="wage"></param>
+        /// <param name="jobsToUpdate"></param>
         /// <returns></returns>
-        AssignmentDTO UpdateAssignment(int ownerId, AssignmentDTO assignment);
+        bool DeleteAssignments(int ownerId, DateTime assignedDate);
 
         /// <summary>
         /// Adds single comment to assignment
@@ -51,21 +54,5 @@ namespace WorkTracker.Server.Services.Contract
         /// <param name="assignmentId"></param>
         /// <returns></returns>
         AssignmentDTO GetAssignmentById(int assignmentId);
-
-        /// <summary>
-        /// Returns the assignment assigned to this worker on this date
-        /// </summary>
-        /// <param name="workerId"></param>
-        /// <param name="date"></param>
-        /// <returns></returns>
-        AssignmentDTO GetAssignmentForDate(int workerId, DateTime date, int ownerId);
-
-        /// <summary>
-        /// Checks if owner submitted the attendance
-        /// </summary>
-        /// <param name="ownerId"></param>
-        /// <param name="date"></param>
-        /// <returns></returns>
-        bool IsAssignmentSubmitted(int ownerId, DateTime date);
     }
 }
