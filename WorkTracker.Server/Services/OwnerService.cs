@@ -3,9 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Localization;
 using WorkTracker.Database.DTO;
 using WorkTracker.Database.Interfaces;
 using WorkTracker.Database.Models;
+using WorkTracker.Server.Exceptions;
 using WorkTracker.Server.Services.Contract;
 
 namespace WorkTracker.Server.Services
@@ -15,12 +17,14 @@ namespace WorkTracker.Server.Services
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private IHelper _helper;
+        private readonly IStringLocalizer<Resource> _stringLocalizer;
 
 
-        public OwnerService(IUnitOfWork unitOfWork, IMapper mapper, IHelper helper)
+        public OwnerService(IUnitOfWork unitOfWork, IMapper mapper, IHelper helper, IStringLocalizer<Resource> stringLocalizer)
         {
             _mapper = mapper;
             _helper = helper;
+            _stringLocalizer = stringLocalizer;
             _unitOfWork = unitOfWork;
         }
 
@@ -37,7 +41,7 @@ namespace WorkTracker.Server.Services
                 Workers = null,
                 Jobs = null,
                 Name = name,
-                Email = email,
+                Email = email.ToLower(),
                 EncryptedPassword = encryptedPassword
             };
 
@@ -58,7 +62,7 @@ namespace WorkTracker.Server.Services
             if (user != null)
                 return _mapper.Map<OwnerDTO>(user);
 
-            throw new Exception("User not found");
+            throw new WtException(_stringLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
         }
 
         /// <summary>
@@ -68,11 +72,11 @@ namespace WorkTracker.Server.Services
         /// <returns></returns>
         public OwnerDTO RetrieveOwnerByEmail(string email)
         {
-            var user = _unitOfWork.Owners.Get(o => string.Equals(o.Email, email))?.FirstOrDefault();
+            var user = _unitOfWork.Owners.Get(o => string.Equals(o.Email, email.ToLower()))?.FirstOrDefault();
             if (user != null)
                 return _mapper.Map<OwnerDTO>(user);
 
-            throw new Exception("User not found");
+            throw new WtException(_stringLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
         }
 
         /// <summary>
@@ -80,22 +84,22 @@ namespace WorkTracker.Server.Services
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public OwnerDTO UpdateOwner(OwnerDTO obj)
+        public OwnerDTO UpdateOwner(OwnerDTO obj, string encryptedPassword)
         {
             var user = _unitOfWork.Owners.GetByID(obj.Id);
             if (user != null)
             {
                 _unitOfWork.Owners.Update(new Owner()
                 {
-                    Id = obj.Id,
                     Name = obj.Name,
                     Email = obj.Email,
+                    EncryptedPassword = encryptedPassword
                 });
                 var updatedUser = _unitOfWork.Owners.GetByID(obj.Id);
                 return _mapper.Map<OwnerDTO>(updatedUser);
             }
 
-            throw new Exception("User not found");
+            throw new WtException(_stringLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
         }
 
         /// <summary>
@@ -116,14 +120,23 @@ namespace WorkTracker.Server.Services
 
         public void VerifyEmail(string email)
         {
-            var user = _unitOfWork.Owners.Get(x => x.Email == email).FirstOrDefault();
+            var user = _unitOfWork.Owners.Get(x => string.Equals(x.Email.ToLower(), email.ToLower()) &&
+                                                   !x.IsEmailVerified).FirstOrDefault();
             if (user == null)
-                throw new Exception("Invalid email");
+                throw new WtException(_stringLocalizer["ErrorInvalidEmail"], Constants.INVALID_EMAIL);
 
             user.IsEmailVerified = true;
 
-            _unitOfWork.Owners.Update(user);
-            _unitOfWork.Commit();
+            try
+            {
+                _unitOfWork.Owners.Update(user);
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+
         }
     }
 }

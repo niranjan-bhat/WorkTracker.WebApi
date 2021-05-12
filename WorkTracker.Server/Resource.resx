@@ -117,6 +117,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AuthenticationFailure" xml:space="preserve">
+    <value>Unable to authenticate the user.</value>
+  </data>
+  <data name="DBErrorDuplicateJobName" xml:space="preserve">
+    <value>Violation of UNIQUE KEY constraint 'AK_Job_Name_OwnerId'</value>
+  </data>
+  <data name="DBErrorDuplicateWorkerMobile" xml:space="preserve">
+    <value>Cannot insert duplicate key row in object 'dbo.Worker' with unique index 'IX_Worker_Mobile'</value>
+  </data>
+  <data name="DuplicateJobName" xml:space="preserve">
+    <value>Job with this name is already present</value>
+  </data>
+  <data name="DuplicateMobileNumber" xml:space="preserve">
+    <value>Mobile number belongs to another worker.</value>
+  </data>
   <data name="ErrorAssignmentNotFound" xml:space="preserve">
     <value>Assignment not found</value>
   </data>
@@ -155,6 +170,9 @@
   </data>
   <data name="OwnerNotFound" xml:space="preserve">
     <value>Owner not found</value>
+  </data>
+  <data name="OwnerPresent" xml:space="preserve">
+    <value>User already registered with this email</value>
   </data>
   <data name="UnableToAddWorker" xml:space="preserve">
     <value>Unable to add worker</value>

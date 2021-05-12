@@ -12,7 +12,7 @@ namespace WorkTracker.Server.Services
         {
             int min = 1000;
             int max = 9999;
-            int otp = 5555;
+            var otp = 5555;
 
             Random rdm = new Random();
             otp = rdm.Next(min, max);

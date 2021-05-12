@@ -7,6 +7,7 @@ using Microsoft.Extensions.Localization;
 using WorkTracker.Database.DTOs;
 using WorkTracker.Database.Interfaces;
 using WorkTracker.Database.Models;
+using WorkTracker.Server.Exceptions;
 using WorkTracker.Server.Services.Contract;
 
 namespace WorkTracker.Server.Services
@@ -36,7 +37,7 @@ namespace WorkTracker.Server.Services
             var owner = _unitOfWork.Owners.GetByID(ownerId);
             if (owner == null)
             {
-                throw new Exception(_strLocalizer["OwnerNotFound"]);
+                throw new WtException(_strLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
             }
 
             var dBjobs = _unitOfWork.Jobs.Get(x => x.OwnerId == ownerId);
@@ -56,7 +57,7 @@ namespace WorkTracker.Server.Services
             var owner = _unitOfWork.Owners.GetByID(ownerId);
             if (owner == null)
             {
-                throw new Exception(_strLocalizer["OwnerNotFound"]);
+                throw new WtException(_strLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
             }
             try
             {
@@ -72,7 +73,14 @@ namespace WorkTracker.Server.Services
             }
             catch (Exception e)
             {
-                throw e;
+                var message = e.InnerException?.Message;
+
+                if (message != null && message.Contains(Constants.DbErrorStringDuplicateJobName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    throw new WtException(_strLocalizer["DuplicateJobName"], Constants.DUPLICATE_JOBNAME);
+                }
+
+                throw new Exception(message);
             }
         }
 
@@ -81,7 +89,7 @@ namespace WorkTracker.Server.Services
             var job = _unitOfWork.Jobs.GetByID(jobId);
             if (job == null)
             {
-                throw new Exception(_strLocalizer["JobNotFound"]);
+                throw new WtException(_strLocalizer["JobNotFound"], Constants.JOB_NOT_FOUND);
             }
 
             return _mapper.Map<JobDTO>(job);

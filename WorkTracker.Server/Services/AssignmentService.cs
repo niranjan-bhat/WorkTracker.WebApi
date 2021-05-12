@@ -9,6 +9,7 @@ using WorkTracker.Database.DTO;
 using WorkTracker.Database.DTOs;
 using WorkTracker.Database.Interfaces;
 using WorkTracker.Database.Models;
+using WorkTracker.Server.Exceptions;
 using WorkTracker.Server.Services.Contract;
 
 namespace WorkTracker.Server.Services
@@ -111,7 +112,8 @@ namespace WorkTracker.Server.Services
 
             var assignment = _unitOfWork.Assignments.GetByID(assignmentId);
 
-            if (assignment == null) throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
+            if (assignment == null) 
+                throw new WtException(_strLocalizer["ErrorAssignmentNotFound"],Constants.ASSIGNMENT_NOT_FOUND);
 
             var insertedComment = _unitOfWork.Comments.Insert(new Comment
             {
@@ -129,7 +131,7 @@ namespace WorkTracker.Server.Services
             var result = _unitOfWork.Assignments.Get(x => x.Id == assignmentId, null,
                     $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)},{nameof(Assignment.Worker)}")
                 ?.FirstOrDefault();
-            if (result == null) throw new Exception(_strLocalizer["ErrorAssignmentNotFound"]);
+            if (result == null) throw new WtException(_strLocalizer["ErrorAssignmentNotFound"],Constants.ASSIGNMENT_NOT_FOUND);
             return _mapper.Map<AssignmentDTO>(result);
         }
 
@@ -189,7 +191,7 @@ namespace WorkTracker.Server.Services
         private Worker GetWorkersFromDb(int workerId, int ownerId)
         {
             var worker = _unitOfWork.Workers.GetByID(workerId);
-            if (worker == null || worker.OwnerId != ownerId) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
+            if (worker == null || worker.OwnerId != ownerId) throw new WtException(_strLocalizer["ErrorWorkerNotFound"],Constants.WORKER_NOT_FOUND);
             return worker;
         }
 
@@ -207,7 +209,7 @@ namespace WorkTracker.Server.Services
             foreach (var job in jobs)
             {
                 var dbjob = _unitOfWork.Jobs.GetByID(job.Id);
-                if (dbjob == null || dbjob.OwnerId != ownerId) throw new Exception(_strLocalizer["ErrorInvalidJob"]);
+                if (dbjob == null || dbjob.OwnerId != ownerId) throw new WtException(_strLocalizer["ErrorInvalidJob"],Constants.JOB_NOT_FOUND);
                 dbjobs.Add(dbjob);
             }
 
@@ -218,7 +220,7 @@ namespace WorkTracker.Server.Services
         {
             var owner = _unitOfWork.Owners.GetByID(ownerId);
             if (owner == null)
-                throw new Exception(_strLocalizer["OwnerNotFound"]);
+                throw new WtException(_strLocalizer["OwnerNotFound"],Constants.OWNER_NOT_FOUND);
 
             return owner;
         }

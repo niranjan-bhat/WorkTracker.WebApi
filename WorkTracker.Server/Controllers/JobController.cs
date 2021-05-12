@@ -35,7 +35,7 @@ namespace WorkTracker.Server.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e);
             }
         }
 
@@ -49,7 +49,7 @@ namespace WorkTracker.Server.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e);
             }
         }
 
@@ -64,7 +64,7 @@ namespace WorkTracker.Server.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e);
             }
         }
     }

@@ -64,7 +64,7 @@ namespace WorkTracker.Server.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(_strLocalizer["UnableToAddWorker"]);
+                return BadRequest(e.Message);
             }
 
             return Ok();

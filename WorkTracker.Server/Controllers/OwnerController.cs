@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using WorkTracker.Database.DTO;
+using WorkTracker.Server.Exceptions;
 using WorkTracker.Server.Services;
 using WorkTracker.Server.Services.Contract;
 
@@ -63,12 +64,42 @@ namespace WorkTracker.Server.Controllers
 
             try
             {
-                var res = _ownerService.AddOwner(name, email, encryptedPassword);
-                return Ok(res);
+                bool isExistingOwner = false;
+                OwnerDTO owner = new OwnerDTO();
+                try
+                {
+                    owner = _ownerService.RetrieveOwnerByEmail(email);
+                    isExistingOwner = true;
+
+                    if (owner.IsEmailVerified)
+                        return BadRequest(_strLocalizer["OwnerPresent"]);
+
+                }
+                catch (Exception e)
+                {
+
+                }
+
+
+                if (isExistingOwner)
+                {
+                    owner = _ownerService.UpdateOwner(new OwnerDTO()
+                    {
+                        Id = owner.Id,
+                        Name = name,
+                        Email = email,
+                    }, encryptedPassword);
+                }
+                else
+                {
+                    owner = _ownerService.AddOwner(name, email, encryptedPassword);
+                }
+
+                return Ok(owner);
             }
             catch (Exception e)
             {
-                return BadRequest(e.InnerException == null ? e.Message : e.InnerException.Message);
+                return BadRequest(e.InnerException == null ? e : e.InnerException);
             }
         }
 
@@ -77,14 +108,9 @@ namespace WorkTracker.Server.Controllers
         [Route("Authenticate")]
         public IActionResult Authenticate(string email, string password)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || !_ownerService.Authenticate(email, password))
             {
-                return BadRequest("Username or password cant be null");
-            }
-
-            if (!_ownerService.Authenticate(email, password))
-            {
-                return BadRequest("Authentication failed ");
+                return BadRequest(new WtException(_strLocalizer["AuthenticationFailure"], Constants.USERNAMEPASSWORD_WRONG));
             }
 
             var token = _tokenManager.GenerateJwtToken();
@@ -96,7 +122,14 @@ namespace WorkTracker.Server.Controllers
         [Route("VerifyEmail")]
         public IActionResult VerifyUserEmail(string email)
         {
-            _ownerService.VerifyEmail(email);
+            try
+            {
+                _ownerService.VerifyEmail(email);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
             return Ok(true);
         }
     }

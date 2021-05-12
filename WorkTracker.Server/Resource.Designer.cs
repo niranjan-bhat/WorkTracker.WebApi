@@ -61,6 +61,51 @@ namespace WorkTracker.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to authenticate the user..
+        /// </summary>
+        public static string AuthenticationFailure {
+            get {
+                return ResourceManager.GetString("AuthenticationFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Violation of UNIQUE KEY constraint &apos;AK_Job_Name_OwnerId&apos;.
+        /// </summary>
+        public static string DBErrorDuplicateJobName {
+            get {
+                return ResourceManager.GetString("DBErrorDuplicateJobName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot insert duplicate key row in object &apos;dbo.Worker&apos; with unique index &apos;IX_Worker_Mobile&apos;.
+        /// </summary>
+        public static string DBErrorDuplicateWorkerMobile {
+            get {
+                return ResourceManager.GetString("DBErrorDuplicateWorkerMobile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job with this name is already present.
+        /// </summary>
+        public static string DuplicateJobName {
+            get {
+                return ResourceManager.GetString("DuplicateJobName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mobile number belongs to another worker..
+        /// </summary>
+        public static string DuplicateMobileNumber {
+            get {
+                return ResourceManager.GetString("DuplicateMobileNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Assignment not found.
         /// </summary>
         public static string ErrorAssignmentNotFound {
@@ -174,6 +219,15 @@ namespace WorkTracker.Server {
         public static string OwnerNotFound {
             get {
                 return ResourceManager.GetString("OwnerNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User already registered with this email.
+        /// </summary>
+        public static string OwnerPresent {
+            get {
+                return ResourceManager.GetString("OwnerPresent", resourceCulture);
             }
         }
         

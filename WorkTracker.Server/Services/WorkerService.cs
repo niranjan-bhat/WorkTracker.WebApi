@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Localization;
 using WorkTracker.Database.DTOs;
 using WorkTracker.Database.Interfaces;
 using WorkTracker.Database.Models;
+using WorkTracker.Server.Exceptions;
 using WorkTracker.Server.Services.Contract;
 
 namespace WorkTracker.Server.Services
@@ -39,7 +41,7 @@ namespace WorkTracker.Server.Services
             var owner = _unitOfWork.Owners.GetByID(ownerId);
             if (owner == null)
             {
-                throw new Exception(_strLocalizer["OwnerNotFound"]);
+                throw new WtException(_strLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
             }
 
             _unitOfWork.Workers.Insert(new Worker()
@@ -48,7 +50,22 @@ namespace WorkTracker.Server.Services
                 Name = workerName,
                 Mobile = mobileNumber
             });
-            _unitOfWork.Commit();
+          
+            try
+            {
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                var message = e.InnerException?.Message;
+
+                if (message != null && message.Contains(_strLocalizer["DBErrorDuplicateWorkerMobile"]))
+                {
+                    throw new WtException(_strLocalizer["DuplicateMobileNumber"],Constants.DUPLICATE_MOBILE_NUMBER);
+                }
+
+                throw new Exception(message);
+            }
 
             var dbWorker = _unitOfWork.Workers.Get(x => x.Name == workerName).FirstOrDefault();
             return _mapper.Map<WorkerDTO>(dbWorker);
@@ -65,7 +82,7 @@ namespace WorkTracker.Server.Services
             {
                 var owner = _unitOfWork.Owners.GetByID(ownerId);
                 if (owner == null)
-                    throw new Exception(_strLocalizer["OwnerNotFound"]);
+                    throw new WtException(_strLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
 
                 var result = _unitOfWork.Workers.Get(x => x.OwnerId == owner.Id);
                var workerList =  result?.Select(x => new WorkerDTO()

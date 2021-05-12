@@ -33,7 +33,7 @@ namespace WorkTracker.Server.Services
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        OwnerDTO UpdateOwner(OwnerDTO obj);
+        OwnerDTO UpdateOwner(OwnerDTO obj, string encryptedPassword);
 
         /// <summary>
         /// Authorizes the user and send back the JWT token
