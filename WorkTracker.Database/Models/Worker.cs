@@ -8,6 +8,7 @@ namespace WorkTracker.Database.Models
         public Worker()
         {
             this.Assignments = new HashSet<Assignment>();
+            this.Payments = new HashSet<Payment>();
         }
         public int Id { get; set; }
         public string Name { get; set; }
@@ -16,6 +17,7 @@ namespace WorkTracker.Database.Models
         public int OwnerId { get; set; }
         
         public virtual ICollection<Assignment> Assignments { get; set; }
+        public virtual ICollection<Payment> Payments { get; set; }
         public virtual Owner Owner { get; set; }
     }
 }

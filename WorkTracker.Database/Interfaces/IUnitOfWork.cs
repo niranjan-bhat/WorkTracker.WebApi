@@ -12,6 +12,7 @@ namespace WorkTracker.Database.Interfaces
         IRepository<Assignment> Assignments { get; }
         IRepository<Comment> Comments { get; }
         IRepository<Owner> Owners { get; }
+        IRepository<Payment> Payments { get; }
         void Commit();
     }
 }

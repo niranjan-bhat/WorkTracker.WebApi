@@ -21,7 +21,7 @@ namespace WorkTracker.Server.Services
         private IHelper _helper;
         private IStringLocalizer _strLocalizer;
 
-        public WorkerService(IUnitOfWork unitOfWork, IStringLocalizer<Resource> stringLocalizer,IMapper mapper, IHelper helper)
+        public WorkerService(IUnitOfWork unitOfWork, IStringLocalizer<Resource> stringLocalizer, IMapper mapper, IHelper helper)
         {
             _mapper = mapper;
             _helper = helper;
@@ -50,7 +50,7 @@ namespace WorkTracker.Server.Services
                 Name = workerName,
                 Mobile = mobileNumber
             });
-          
+
             try
             {
                 _unitOfWork.Commit();
@@ -61,7 +61,12 @@ namespace WorkTracker.Server.Services
 
                 if (message != null && message.Contains(_strLocalizer["DBErrorDuplicateWorkerMobile"]))
                 {
-                    throw new WtException(_strLocalizer["DuplicateMobileNumber"],Constants.DUPLICATE_MOBILE_NUMBER);
+                    throw new WtException(_strLocalizer["DuplicateMobileNumber"], Constants.DUPLICATE_MOBILE_NUMBER);
+                }
+
+                if (message != null && message.Contains(_strLocalizer["DBErrorDuplicateWorkerName"]))
+                {
+                    throw new WtException(_strLocalizer["DuplicateWorkerName"], Constants.DUPLICATE_WORKERNAME);
                 }
 
                 throw new Exception(message);
@@ -70,7 +75,7 @@ namespace WorkTracker.Server.Services
             var dbWorker = _unitOfWork.Workers.Get(x => x.Name == workerName).FirstOrDefault();
             return _mapper.Map<WorkerDTO>(dbWorker);
         }
-        
+
         /// <summary>
         /// Retrieves all the workers belongs to a Owner
         /// </summary>
@@ -85,7 +90,7 @@ namespace WorkTracker.Server.Services
                     throw new WtException(_strLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
 
                 var result = _unitOfWork.Workers.Get(x => x.OwnerId == owner.Id);
-               var workerList =  result?.Select(x => new WorkerDTO()
+                var workerList = result?.Select(x => new WorkerDTO()
                 {
                     Id = x.Id,
                     Name = x.Name,
@@ -93,12 +98,32 @@ namespace WorkTracker.Server.Services
                     OwnerId = x.OwnerId
                 });
 
-               return workerList?.ToList();
+                return workerList?.ToList();
             }
             catch (Exception e)
             {
                 throw;
             }
+        }
+
+        public int CalculateSalary(int workerId, DateTime fromDate, DateTime toDate)
+        {
+            var worker = _unitOfWork.Workers.GetByID(workerId);
+            if (worker == null)
+                throw new WtException(_strLocalizer["ErrorWorkerNotFound"], Constants.WORKER_NOT_FOUND);
+
+            if ((toDate - fromDate).TotalDays > 1000)
+            {
+                throw new Exception(_strLocalizer["ErrorOverflowDateRange1000Days"]);
+            }
+
+            var allAssignments = _unitOfWork.Assignments.Get(x =>
+                                                                  x.WorkerId == workerId &&
+                                                                  x.AssignedDate >= fromDate &&
+                                                                  x.AssignedDate <= toDate);
+
+            int? totalSalary = allAssignments?.Sum(x => x.Wage);
+            return totalSalary.HasValue ? totalSalary.Value : 0;
         }
     }
 }

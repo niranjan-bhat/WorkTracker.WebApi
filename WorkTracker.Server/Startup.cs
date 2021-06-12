@@ -55,6 +55,7 @@ namespace WorkTracker.Server
             services.AddScoped(typeof(ITokenManager), typeof(TokenManager));
             services.AddScoped(typeof(IEmailService), typeof(EmailService));
             services.AddScoped(typeof(IOTPService), typeof(OTPService));
+            services.AddScoped(typeof(IPaymentService), typeof(PaymentService));
 
             services.AddLocalization();
             services.Configure<RequestLocalizationOptions>(

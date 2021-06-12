@@ -18,6 +18,7 @@ namespace WorkTracker.Server.AutoMapper
             CreateMap<WorkerDTO, Worker>().ReverseMap();
             CreateMap<CommentDTO, Comment>().ReverseMap();
             CreateMap<Assignment, AssignmentDTO>().ReverseMap();
+            CreateMap<Payment, PaymentDTO>().ReverseMap();
         }
     }
 }

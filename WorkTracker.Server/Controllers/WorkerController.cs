@@ -60,14 +60,28 @@ namespace WorkTracker.Server.Controllers
 
             try
             {
-                _workerService.AddWorkerForOwner(ownerId, workerName, mobileNumber);
+                var res = _workerService.AddWorkerForOwner(ownerId, workerName, mobileNumber);
+                return Ok(res);
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
             }
+        }
 
-            return Ok();
+        [HttpGet]
+        [Route("GetSalary")]
+        public IActionResult GetSalary(int workerId, DateTime startingDate, DateTime endingDate)
+        {
+
+            try
+            {
+                return Ok(_workerService.CalculateSalary(workerId, startingDate, endingDate));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
     }
 }

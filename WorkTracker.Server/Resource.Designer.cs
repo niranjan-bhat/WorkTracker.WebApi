@@ -88,6 +88,15 @@ namespace WorkTracker.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Violation of UNIQUE KEY constraint &apos;AK_Worker_Name_OwnerId&apos;.
+        /// </summary>
+        public static string DBErrorDuplicateWorkerName {
+            get {
+                return ResourceManager.GetString("DBErrorDuplicateWorkerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Job with this name is already present.
         /// </summary>
         public static string DuplicateJobName {
@@ -102,6 +111,15 @@ namespace WorkTracker.Server {
         public static string DuplicateMobileNumber {
             get {
                 return ResourceManager.GetString("DuplicateMobileNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to process the request, duplicate worker name..
+        /// </summary>
+        public static string DuplicateWorkerName {
+            get {
+                return ResourceManager.GetString("DuplicateWorkerName", resourceCulture);
             }
         }
         
@@ -169,11 +187,20 @@ namespace WorkTracker.Server {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date range can be maximum of 1000 days.
+        /// </summary>
+        public static string ErrorOverflowDateRange1000Days {
+            get {
+                return ResourceManager.GetString("ErrorOverflowDateRange1000Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Date range can be maximum of 31 days.
         /// </summary>
-        public static string ErrorOverflowDateRange {
+        public static string ErrorOverflowDateRange31 {
             get {
-                return ResourceManager.GetString("ErrorOverflowDateRange", resourceCulture);
+                return ResourceManager.GetString("ErrorOverflowDateRange31", resourceCulture);
             }
         }
         

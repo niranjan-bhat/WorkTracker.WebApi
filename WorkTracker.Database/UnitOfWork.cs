@@ -13,6 +13,7 @@ namespace WorkTracker.Database
         private BaseRepository<Assignment> _assignments;
         private BaseRepository<Comment> _commentRepository;
         private BaseRepository<Owner> _ownerRepository;
+        private BaseRepository<Payment> _paymentRepository;
 
         public UnitOfWork(WorkTrackerContext dbContext)
         {
@@ -56,6 +57,14 @@ namespace WorkTracker.Database
             get
             {
                 return _ownerRepository ??= new BaseRepository<Owner>(_dbContext);
+            }
+        }
+
+        public IRepository<Payment> Payments
+        {
+            get
+            {
+                return _paymentRepository ??= new BaseRepository<Payment>(_dbContext);
             }
         }
 

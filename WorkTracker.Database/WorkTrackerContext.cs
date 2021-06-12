@@ -45,6 +45,13 @@ namespace WorkTracker.Database
                     j => j.HasOne<Assignment>().WithMany().OnDelete(DeleteBehavior.Cascade),
                     j => j.HasOne<Job>().WithMany().OnDelete(DeleteBehavior.Cascade));
 
+            modelBuilder.Entity<Payment>().HasKey(x => x.Id);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne<Worker>(s => s.Worker)
+                .WithMany(g => g.Payments)
+                .HasForeignKey(s => s.WorkerId);
+
         }
     }
 }

@@ -23,5 +23,14 @@ namespace WorkTracker.Server.Services.Contract
         /// <param name="ownerId"></param>
         /// <returns></returns>
         List<WorkerDTO> GetAllWorkersBelongsToOwner(int ownerId);
+
+        /// <summary>
+        /// calculate salary of a worker from fromDate to toDate
+        /// </summary>
+        /// <param name="workerId"></param>
+        /// <param name="fromDate"></param>
+        /// <param name="toDate"></param>
+        /// <returns></returns>
+        int CalculateSalary(int workerId, DateTime fromDate, DateTime toDate);
     }
 }

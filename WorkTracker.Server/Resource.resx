@@ -126,11 +126,17 @@
   <data name="DBErrorDuplicateWorkerMobile" xml:space="preserve">
     <value>Cannot insert duplicate key row in object 'dbo.Worker' with unique index 'IX_Worker_Mobile'</value>
   </data>
+  <data name="DBErrorDuplicateWorkerName" xml:space="preserve">
+    <value>Violation of UNIQUE KEY constraint 'AK_Worker_Name_OwnerId'</value>
+  </data>
   <data name="DuplicateJobName" xml:space="preserve">
     <value>Job with this name is already present</value>
   </data>
   <data name="DuplicateMobileNumber" xml:space="preserve">
     <value>Mobile number belongs to another worker.</value>
+  </data>
+  <data name="DuplicateWorkerName" xml:space="preserve">
+    <value>Unable to process the request, duplicate worker name.</value>
   </data>
   <data name="ErrorAssignmentNotFound" xml:space="preserve">
     <value>Assignment not found</value>
@@ -153,7 +159,10 @@
   <data name="ErrorInvalidWorkerName" xml:space="preserve">
     <value>Invalid worker name</value>
   </data>
-  <data name="ErrorOverflowDateRange" xml:space="preserve">
+  <data name="ErrorOverflowDateRange1000Days" xml:space="preserve">
+    <value>Date range can be maximum of 1000 days</value>
+  </data>
+  <data name="ErrorOverflowDateRange31" xml:space="preserve">
     <value>Date range can be maximum of 31 days</value>
   </data>
   <data name="ErrorWorkerNotFound" xml:space="preserve">

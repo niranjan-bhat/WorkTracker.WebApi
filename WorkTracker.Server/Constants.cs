@@ -19,6 +19,7 @@ namespace WorkTracker.Server
         public static string USERNAMEPASSWORD_WRONG = "USERNAMEPASSWORD_WRONG";
         public static string DUPLICATE_JOBNAME = "DUPLICATE_JOBNAME";
         public static string DUPLICATE_MOBILE_NUMBER = "DUPLICATE_MOBILE_NUMBER";
+        public static string DUPLICATE_WORKERNAME = "DUPLICATE_WORKERNAME";
         public static string INVALID_EMAIL = "INVALID_EMAIL";
         #endregion
 
