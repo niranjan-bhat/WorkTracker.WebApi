@@ -41,6 +41,7 @@ namespace WorkTracker.Server.Services
             }
 
             var dBjobs = _unitOfWork.Jobs.Get(x => x.OwnerId == ownerId);
+            dBjobs = dBjobs?.OrderBy(x => x.CreatedDate)?.Reverse();
             var jobDto = dBjobs?.Select(x => _mapper.Map<JobDTO>(x));
 
             return jobDto?.ToList();

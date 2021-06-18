@@ -58,11 +58,11 @@ namespace WorkTracker.Server.Controllers
         [SwaggerOperation(Summary = "Retrieve all the assignment belongs to given range of dates and belongs to this worker ")]
         [HttpGet]
         [Route("GetAllAssignment")]
-        public IActionResult GetAllAssignment(int ownerId, DateTime startDate, DateTime endDate, int? workerId = null)
+        public IActionResult GetAllAssignment(int ownerId, DateTime startDate, DateTime endDate, int? workerId = null, int? jobId = null)
         {
             try
             {
-                var result = _assignmentService.GetAllAssignments(ownerId, startDate, endDate, workerId);
+                var result = _assignmentService.GetAllAssignments(ownerId, startDate, endDate, workerId,jobId);
                 return Ok(result);
             }
             catch (Exception e)

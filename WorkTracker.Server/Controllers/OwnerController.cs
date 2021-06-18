@@ -72,7 +72,7 @@ namespace WorkTracker.Server.Controllers
                     isExistingOwner = true;
 
                     if (owner.IsEmailVerified)
-                        return BadRequest(_strLocalizer["OwnerPresent"]);
+                        return BadRequest( new WtException(_strLocalizer["OwnerPresent"],Constants.DUPLICATE_EMAIL));
 
                 }
                 catch (Exception e)

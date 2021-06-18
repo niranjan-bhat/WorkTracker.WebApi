@@ -27,7 +27,7 @@ namespace WorkTracker.Server.Services.Contract
         /// <param name="endDateTime"></param>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int? workerId);
+        List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int? workerId, int? jobId);
 
         /// <summary>
         /// Updates the assignment

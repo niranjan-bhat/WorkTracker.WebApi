@@ -34,8 +34,8 @@ internal class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : cl
 
 
         if (orderBy != null)
-            return orderBy(query)?.ToList();
-        return query.ToList();
+            return orderBy(query);
+        return query;
     }
 
     public virtual TEntity GetByID(object id)

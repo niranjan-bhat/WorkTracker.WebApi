@@ -20,6 +20,8 @@ namespace WorkTracker.Server
         public static string DUPLICATE_JOBNAME = "DUPLICATE_JOBNAME";
         public static string DUPLICATE_MOBILE_NUMBER = "DUPLICATE_MOBILE_NUMBER";
         public static string DUPLICATE_WORKERNAME = "DUPLICATE_WORKERNAME";
+        public static string DUPLICATE_EMAIL = "DUPLICATE_EMAIL";
+
         public static string INVALID_EMAIL = "INVALID_EMAIL";
         #endregion
 

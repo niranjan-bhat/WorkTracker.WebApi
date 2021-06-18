@@ -38,29 +38,43 @@ namespace WorkTracker.Server.Services
         /// <param name="endDateTime"></param>
         /// <param name="workerId"></param>
         /// <returns></returns>
-        public List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int? workerId)
+        public List<AssignmentDTO> GetAllAssignments(int ownerId, DateTime startDateTime, DateTime endDateTime, int? workerId, int? jobId)
         {
             if (startDateTime == null || endDateTime == null || startDateTime > endDateTime)
                 throw new Exception(_strLocalizer["ErrorInvalidDate"]);
 
-            if ((endDateTime - startDateTime).TotalDays > 31)
+            if ((endDateTime - startDateTime).TotalDays > 1000)
             {
-                throw new Exception(_strLocalizer["ErrorOverflowDateRange"]);
+                throw new Exception(_strLocalizer["ErrorOverflowDateRange1000Days"]);
             }
+
+            var assignmentList = _unitOfWork.Assignments.Get(x =>
+                                                                  x.AssignedDate >= startDateTime &&
+                                                                  x.AssignedDate <= endDateTime, null,
+                $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}");
 
             if (workerId.HasValue)
             {
                 var worker = _unitOfWork.Workers.GetByID(workerId);
                 if (worker == null) throw new Exception(_strLocalizer["ErrorWorkerNotFound"]);
+
+                assignmentList = assignmentList.Where(x => x.WorkerId == workerId);
             }
 
-            var assignmentList = _unitOfWork.Assignments.Get(x => (workerId == null || x.WorkerId == workerId.Value) &&
-                                                                  x.AssignedDate >= startDateTime &&
-                                                                  x.AssignedDate <= endDateTime, null,
-                                                                  $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}")
-                ?.Select(x => _mapper.Map<AssignmentDTO>(x)).ToList();
+            if (jobId.HasValue)
+            {
+                var job = GetJobsFromDb(new List<JobDTO>()
+                {
+                    new JobDTO() {Id = jobId.Value}
+                }, ownerId).FirstOrDefault();
 
-            return assignmentList;
+                assignmentList = assignmentList.Where(x => x.Jobs.Contains(job));
+            }
+
+
+            var result = assignmentList?.Select(x => _mapper.Map<AssignmentDTO>(x)).ToList();
+
+            return result;
         }
 
         /// <summary>
@@ -72,7 +86,7 @@ namespace WorkTracker.Server.Services
         public bool DeleteAssignments(int ownerId, DateTime assignedDate)
         {
             var assignmentsToDelete = _unitOfWork.Assignments.Get(x => x.OwnerId == ownerId &&
-                                                                       x.AssignedDate == assignedDate,null,
+                                                                       x.AssignedDate == assignedDate, null,
                                         $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}")?.ToList();
 
             if (assignmentsToDelete != null)
@@ -112,8 +126,8 @@ namespace WorkTracker.Server.Services
 
             var assignment = _unitOfWork.Assignments.GetByID(assignmentId);
 
-            if (assignment == null) 
-                throw new WtException(_strLocalizer["ErrorAssignmentNotFound"],Constants.ASSIGNMENT_NOT_FOUND);
+            if (assignment == null)
+                throw new WtException(_strLocalizer["ErrorAssignmentNotFound"], Constants.ASSIGNMENT_NOT_FOUND);
 
             var insertedComment = _unitOfWork.Comments.Insert(new Comment
             {
@@ -131,7 +145,7 @@ namespace WorkTracker.Server.Services
             var result = _unitOfWork.Assignments.Get(x => x.Id == assignmentId, null,
                     $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)},{nameof(Assignment.Worker)}")
                 ?.FirstOrDefault();
-            if (result == null) throw new WtException(_strLocalizer["ErrorAssignmentNotFound"],Constants.ASSIGNMENT_NOT_FOUND);
+            if (result == null) throw new WtException(_strLocalizer["ErrorAssignmentNotFound"], Constants.ASSIGNMENT_NOT_FOUND);
             return _mapper.Map<AssignmentDTO>(result);
         }
 
@@ -191,7 +205,7 @@ namespace WorkTracker.Server.Services
         private Worker GetWorkersFromDb(int workerId, int ownerId)
         {
             var worker = _unitOfWork.Workers.GetByID(workerId);
-            if (worker == null || worker.OwnerId != ownerId) throw new WtException(_strLocalizer["ErrorWorkerNotFound"],Constants.WORKER_NOT_FOUND);
+            if (worker == null || worker.OwnerId != ownerId) throw new WtException(_strLocalizer["ErrorWorkerNotFound"], Constants.WORKER_NOT_FOUND);
             return worker;
         }
 
@@ -203,13 +217,13 @@ namespace WorkTracker.Server.Services
         /// <returns></returns>
         private List<Job> GetJobsFromDb(List<JobDTO> jobs, int ownerId)
         {
-            if (jobs == null) throw new Exception(_strLocalizer["ErrorInvalidJob"]);
+            if (jobs == null || jobs.Count == 0) throw new Exception(_strLocalizer["ErrorInvalidJob"]);
             var dbjobs = new List<Job>();
 
             foreach (var job in jobs)
             {
                 var dbjob = _unitOfWork.Jobs.GetByID(job.Id);
-                if (dbjob == null || dbjob.OwnerId != ownerId) throw new WtException(_strLocalizer["ErrorInvalidJob"],Constants.JOB_NOT_FOUND);
+                if (dbjob == null || dbjob.OwnerId != ownerId) throw new WtException(_strLocalizer["ErrorInvalidJob"], Constants.JOB_NOT_FOUND);
                 dbjobs.Add(dbjob);
             }
 
@@ -220,7 +234,7 @@ namespace WorkTracker.Server.Services
         {
             var owner = _unitOfWork.Owners.GetByID(ownerId);
             if (owner == null)
-                throw new WtException(_strLocalizer["OwnerNotFound"],Constants.OWNER_NOT_FOUND);
+                throw new WtException(_strLocalizer["OwnerNotFound"], Constants.OWNER_NOT_FOUND);
 
             return owner;
         }
