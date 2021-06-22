@@ -159,11 +159,11 @@
   <data name="ErrorInvalidWorkerName" xml:space="preserve">
     <value>Invalid worker name</value>
   </data>
-  <data name="ErrorOverflowDateRange1000Days" xml:space="preserve">
-    <value>Date range can be maximum of 1000 days</value>
-  </data>
   <data name="ErrorOverflowDateRange31" xml:space="preserve">
     <value>Date range can be maximum of 31 days</value>
+  </data>
+  <data name="ErrorOverflowDateRange5000Days" xml:space="preserve">
+    <value>Date range can be maximum of 5000 days</value>
   </data>
   <data name="ErrorWorkerNotFound" xml:space="preserve">
     <value>Worker not found</value>

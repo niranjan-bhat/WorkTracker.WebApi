@@ -187,20 +187,20 @@ namespace WorkTracker.Server {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date range can be maximum of 1000 days.
-        /// </summary>
-        public static string ErrorOverflowDateRange1000Days {
-            get {
-                return ResourceManager.GetString("ErrorOverflowDateRange1000Days", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Date range can be maximum of 31 days.
         /// </summary>
         public static string ErrorOverflowDateRange31 {
             get {
                 return ResourceManager.GetString("ErrorOverflowDateRange31", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date range can be maximum of 5000 days.
+        /// </summary>
+        public static string ErrorOverflowDateRange5000Days {
+            get {
+                return ResourceManager.GetString("ErrorOverflowDateRange5000Days", resourceCulture);
             }
         }
         

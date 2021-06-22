@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
@@ -43,12 +44,12 @@ namespace WorkTracker.Server.Services
             if (startDateTime == null || endDateTime == null || startDateTime > endDateTime)
                 throw new Exception(_strLocalizer["ErrorInvalidDate"]);
 
-            if ((endDateTime - startDateTime).TotalDays > 1000)
+            if ((endDateTime - startDateTime).TotalDays > 5000)
             {
-                throw new Exception(_strLocalizer["ErrorOverflowDateRange1000Days"]);
+                throw new Exception(_strLocalizer["ErrorOverflowDateRange5000Days"]);
             }
 
-            var assignmentList = _unitOfWork.Assignments.Get(x =>
+            var assignmentList = _unitOfWork.Assignments.Get(x =>x.OwnerId == ownerId &&
                                                                   x.AssignedDate >= startDateTime &&
                                                                   x.AssignedDate <= endDateTime, null,
                 $"{nameof(Assignment.Jobs)},{nameof(Assignment.Comments)}");
@@ -150,36 +151,56 @@ namespace WorkTracker.Server.Services
         }
 
         /// <summary>
-        ///     Insert assignment to the database
+        /// Add assignments in bulk
         /// </summary>
-        /// <param name="ownerId"></param>
-        /// <param name="wage"></param>
-        /// <param name="workerId"></param>
-        /// <param name="assignedDate"></param>
-        /// <param name="jobs"></param>
+        /// <param name="assignments"></param>
         /// <returns></returns>
-        public AssignmentDTO AddAssignment(int ownerId, int wage, int workerId, DateTime assignedDate,
-            List<JobDTO> jobs)
+        public List<AssignmentDTO> AddAssignments(List<AssignmentDTO> assignments)
         {
-            var worker = GetWorkersFromDb(workerId, ownerId);
-
-            var dbJobs = GetJobsFromDb(jobs, ownerId);
-
-            var owner = GetOwnerByID(ownerId);
-
-            var insertedEntity = _unitOfWork.Assignments.Insert(new Assignment
+            if (assignments == null || assignments.Count == 0)
             {
-                Worker = worker,
-                Jobs = dbJobs,
-                Wage = wage,
-                Owner = owner,
-                AssignedDate = assignedDate
-            });
+                throw new InvalidDataException();
+            }
+
+            var insertedRecords = new List<AssignmentDTO>();
+
+            int ownerId = assignments.FirstOrDefault().OwnerId;
+
+            foreach (var assignment in assignments)
+            {
+                var dbWorker = GetWorkersFromDb(assignment.WorkerId, ownerId);
+
+                var dbJobs = GetJobsFromDb(assignment.Jobs, ownerId);
+
+                var owner = GetOwnerByID(ownerId);
+
+                var insertedEntity = _unitOfWork.Assignments.Insert(new Assignment
+                {
+                    Worker = dbWorker,
+                    Jobs = dbJobs,
+                    Wage = assignment.Wage,
+                    Owner = owner,
+                    AssignedDate = assignment.AssignedDate
+                });
+
+                insertedRecords.Add(_mapper.Map<AssignmentDTO>(insertedEntity));
+            }
+
             _unitOfWork.Commit();
+            return insertedRecords;
+        }
 
-            var entityInserted = _unitOfWork.Assignments.GetByID(insertedEntity.Id);
+        private void ValidateWorkers(IEnumerable<int> workerIdList, int ownerId)
+        {
+            foreach (var workerId in workerIdList)
+            {
+                GetWorkersFromDb(workerId, ownerId);//Check if the worker exists in DB
+            }
+        }
 
-            return _mapper.Map<AssignmentDTO>(entityInserted);
+        private void ValidateJobs(IEnumerable<List<JobDTO>> @select)
+        {
+            throw new NotImplementedException();
         }
 
         //public AssignmentDTO GetAssignmentForDate(int workerId, DateTime date, int ownerId)

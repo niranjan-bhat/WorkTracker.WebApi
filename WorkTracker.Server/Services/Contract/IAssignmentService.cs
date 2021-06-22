@@ -9,15 +9,11 @@ namespace WorkTracker.Server.Services.Contract
     public interface IAssignmentService
     {
         /// <summary>
-        /// Insert assignment to the database
+        /// Insert multiple assignment into the database
         /// </summary>
-        /// <param name="ownerId"></param>
-        /// <param name="wage"></param>
-        /// <param name="workerId"></param>
-        /// <param name="assignedDate"></param>
-        /// <param name="jobs"></param>
+        /// <param name="assignments"></param>
         /// <returns></returns>
-        AssignmentDTO AddAssignment(int ownerId, int wage, int workerId, DateTime assignedDate, List<JobDTO> jobs);
+        List<AssignmentDTO> AddAssignments(List<AssignmentDTO> assignments);
 
         /// <summary>
         /// Returns all the assignment within the given date range corresponding to specific worker and owner.

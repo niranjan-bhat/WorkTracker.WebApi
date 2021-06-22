@@ -26,11 +26,11 @@ namespace WorkTracker.Server.Controllers
 
         [SwaggerOperation(Summary = "Add a assignment to a worker")]
         [HttpPost]
-        public IActionResult AddAssignment(int ownerId, int wage, int workerId, DateTime assignedDate, [FromBody] List<JobDTO> jobs)
+        public IActionResult AddAssignment([FromBody] List<AssignmentDTO> assignments)
         {
             try
             {
-                var result = _assignmentService.AddAssignment(ownerId, wage, workerId, assignedDate, jobs);
+                var result = _assignmentService.AddAssignments(assignments);
                 return Ok(result);
             }
             catch (Exception e)
@@ -62,7 +62,7 @@ namespace WorkTracker.Server.Controllers
         {
             try
             {
-                var result = _assignmentService.GetAllAssignments(ownerId, startDate, endDate, workerId,jobId);
+                var result = _assignmentService.GetAllAssignments(ownerId, startDate, endDate, workerId, jobId);
                 return Ok(result);
             }
             catch (Exception e)
